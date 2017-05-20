@@ -6,9 +6,9 @@
     "node": "6.10.0",
     "npm": "3.10.x"
   },
-  "main": "app.js",
+  "main": "server/app.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node server/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
