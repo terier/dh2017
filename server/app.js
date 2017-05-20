@@ -54,7 +54,7 @@ app.post('/login', function (req, res) {
       console.error('Error accessing user collection: ' + err);
     }
 
-    collection.find({}, function (err, users) {
+    collection.find().toArray(function (err, users) {
       if (err) {
         console.error('Error fetching all users: ' + err);
       }

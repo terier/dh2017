@@ -3,8 +3,7 @@ var constants = require('../constants')
 
 var Schema = new mongoose.Schema({
   name: {
-    type: String,
-    index: true
+    type: String
   },
   x: {
     type: Number
@@ -13,8 +12,7 @@ var Schema = new mongoose.Schema({
     type: Number
   },
   targetUserId: {
-    type: Number,
-    default: null,
+    type: String,
     index: true
   }
 });
