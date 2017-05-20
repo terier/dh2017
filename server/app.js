@@ -37,7 +37,8 @@ MongoClient.connect('mongodb://localhost:27017/k1ller', function (err, db) {
         name: 'User 1',
         x: Math.random() * canvasWidth - (canvasWidth / 2),
         y: Math.random() * canvasHeight - (canvasHeight / 2),
-        targetUserId: null
+        targetUserId: null,
+        targetUserName: null
       });
 
       collection.save(user, {w: 1}, function (err) {
@@ -76,6 +77,7 @@ app.post('/login', function (req, res) {
   console.log('Creating user with name: ' + name);
 
   var targetUserId = null;
+  var targetUserName = null;
 
   this.db.collection('user', function (err, collection) {
     if (err) {
@@ -113,6 +115,7 @@ app.post('/login', function (req, res) {
 
         if (targetUser !== null) {
           targetUserId = targetUser._id;
+          targetUserName = targetUser.name;
         }
       }
 
@@ -125,7 +128,8 @@ app.post('/login', function (req, res) {
         name: name,
         x: Math.random() * canvasWidth - (canvasWidth / 2),
         y: Math.random() * canvasHeight - (canvasHeight / 2),
-        targetUserId: targetUserId
+        targetUserId: targetUserId,
+        targetUserName: targetUserName
       });
 
       console.log('Saving user...');

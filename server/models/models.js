@@ -14,6 +14,9 @@ var Schema = new mongoose.Schema({
   targetUserId: {
     type: String,
     index: true
+  },
+  targetUserName: {
+    type: String
   }
 });
 
