@@ -1,15 +1,17 @@
 (function(global) {
 
 function Renderer() {
-  this.camera = new THREE.PerspectiveCamera(90, 1, 0.5, 3000);
+  this.camera = new THREE.PerspectiveCamera(75, 1, 0.5, 3000);
   this.scene = new THREE.Scene();
   this.renderer = new THREE.WebGLRenderer();
 
-  var geometry = new THREE.BoxGeometry(1, 1, 1);
-  var material = new THREE.MeshBasicMaterial({ color: "#433F81" });
-  var cube = new THREE.Mesh(geometry, material);
+  this.renderer.setClearColor(new THREE.Color('#fffeef'));
 
-  this.renderer.setClearColor(new THREE.Color('green'));
+  var grid = new THREE.GridHelper(2000, 100, new THREE.Color('#ff00ff'), new THREE.Color('#ffccaa'));
+  this.scene.add(grid);
+
+  this.camera.position.set(100, 300, 300);
+  var controls = new THREE.OrbitControls(this.camera);
 }
 
 global.Renderer = Renderer;
@@ -22,6 +24,7 @@ _.render = function() {
 
 _.resize = function(w, h) {
   this.camera.aspect = w / h;
+  this.camera.updateProjectionMatrix();
   this.renderer.setSize(w, h);
 };
 
