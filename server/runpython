@@ -1,6 +1,0 @@
-#!/bin/bash
-
-APP_ROOT=$(dirname $(dirname $(readlink -e $0)))
-cd "$APP_ROOT"
-
-python -m http.server
