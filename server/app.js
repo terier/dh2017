@@ -8,6 +8,9 @@ var constants = require('./constants');
 
 var MongoClient = require('mongodb').MongoClient;
 
+const canvasWidth = constants.canvasSize.width;
+const canvasHeight = constants.canvasSize.height;
+
 // Connect to the db
 MongoClient.connect('mongodb://localhost:27017/k1ller', function (err, db) {
   if (err) {
@@ -18,6 +21,34 @@ MongoClient.connect('mongodb://localhost:27017/k1ller', function (err, db) {
 
   // set db variable
   this.db = db;
+
+  // clear users and one user when instantiating the server
+  db.collection('user', function (err, collection) {
+    if (err) {
+      console.error('Error accessing user collection: ' + err);
+    }
+
+    collection.remove(function (err) {
+      if (err) {
+        console.error('Error removing users from user collection: ' + err);
+      }
+
+      var user = new models.User ({
+        name: 'User 1',
+        x: Math.random() * canvasWidth - (canvasWidth / 2),
+        y: Math.random() * canvasHeight - (canvasHeight / 2),
+        targetUserId: null
+      });
+
+      collection.save(user, {w: 1}, function (err) {
+        if (err) {
+          console.error('Error when saving user: ' + err);
+        }
+
+        console.log('Initial user saved successfully!');
+      });
+    })
+  });
 });
 
 getDatabase = function() {
@@ -43,9 +74,6 @@ app.post('/login', function (req, res) {
   var name = req.body.name;
 
   console.log('Creating user with name: ' + name);
-
-  const canvasWidth = constants.canvasSize.width;
-  const canvasHeight = constants.canvasSize.height;
 
   var targetUserId = null;
 
