@@ -297,7 +297,7 @@ app.post('/kill', function (req, res) {
 
                 users.forEach(function (user) {
                   // exclude targeted users and yourself
-                  if (targetedUsers.indexOf(user._id) === -1 && user._id !== userId) {
+                  if (targetedUsers.indexOf(user._id) === -1 && user._id.toString() !== userId) {
                     nonTargetedUsers.push(user);
                   }
                 });
