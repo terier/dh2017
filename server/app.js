@@ -303,7 +303,7 @@ app.post('/kill', function (req, res) {
                 });
 
                 console.log('Targeted users: ' + targetedUsers.join(', '));
-                console.log('Non targeted users: ' + nonTargetedUsers.join(', '));
+                console.log('Non targeted users: ' + nonTargetedUsers.map(function(u) { return u.name; }).join(', '));
 
                 if (nonTargetedUsers.length > 0) {
                   const userIdx = Math.round(Math.random() * (nonTargetedUsers.length - 1));
