@@ -183,41 +183,53 @@ app.post('/update', function (req, res) {
         console.error('Error when fetching inserted user on update: ' + err);
       }
 
-      var newAx = user.x + (-5 * Number(ax));
-      var newAy = user.y + (5 * Number(ay));
+      if (user != null) {
+        var newAx = user.x + (-5 * Number(ax));
+        var newAy = user.y + (5 * Number(ay));
 
-      var from = new THREE.Vector2(user.x, user.y);
-      var to = new THREE.Vector2(newAx, newAy);
+        var from = new THREE.Vector2(user.x, user.y);
+        var to = new THREE.Vector2(newAx, newAy);
 
-      // calculate new position
-      var newPositionVector = map.move(from, to);
+        // calculate new position
+        var newPositionVector = map.move(from, to);
 
-      user.x = newPositionVector.x;
-      user.y = newPositionVector.y;
+        user.x = newPositionVector.x;
+        user.y = newPositionVector.y;
 
-      collection.save(user, {w: 1}, function (err) {
-        if (err) {
-          console.error('Error when saving user: ' + err);
-        }
-
-        console.log('User saved successfully!');
-
-        this.db.collection('user', function (err, collection) {
+        collection.save(user, {w: 1}, function (err) {
           if (err) {
-            console.error('Error accessing user collection on update: ' + err);
+            console.error('Error when saving user: ' + err);
           }
 
-          collection.find().toArray(function (err, users) {
+          console.log('User saved successfully!');
+
+          this.db.collection('user', function (err, collection) {
             if (err) {
-              console.error('Error fetching users collection on update ' + err);
+              console.error('Error accessing user collection on update: ' + err);
             }
 
-            res.json({
-              users
+            collection.find().toArray(function (err, users) {
+              if (err) {
+                console.error('Error fetching users collection on update ' + err);
+              }
+
+              res.json({
+                users
+              });
             });
           });
         });
-      });
+      } else {
+        collection.find().toArray(function (err, users) {
+          if (err) {
+            console.error('Error fetching users collection on update ' + err);
+          }
+
+          res.json({
+            users
+          });
+        });
+      }
     })
   });
 });
