@@ -65,7 +65,7 @@ function update() {
     });
 }
 
-var updateInterval = 1000;
+var updateInterval = 400;
 var t0 = Date.now();
 
 function ticker() {

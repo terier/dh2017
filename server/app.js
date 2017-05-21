@@ -135,8 +135,8 @@ app.post('/login', function (req, res) {
       // generate user with random starting position
       var user = new models.User ({
         name: name,
-        x: Math.random() * canvasWidth - (canvasWidth / 2) - 50,
-        y: Math.random() * canvasHeight - (canvasHeight / 2) - 50,
+        x: Math.random() * canvasWidth - (canvasWidth / 2) - 100,
+        y: Math.random() * canvasHeight - (canvasHeight / 2) - 100,
         targetUserId: targetUserId,
         targetUserName: targetUserName
       });
@@ -184,8 +184,8 @@ app.post('/update', function (req, res) {
       }
 
       if (user != null) {
-        var newAx = user.x + (-5 * Number(ax));
-        var newAy = user.y + (5 * Number(ay));
+        var newAx = user.x + (-7 * Number(ax));
+        var newAy = user.y + (7 * Number(ay));
 
         var from = new THREE.Vector2(user.x, user.y);
         var to = new THREE.Vector2(newAx, newAy);
@@ -303,18 +303,18 @@ app.post('/kill', function (req, res) {
                 });
 
                 console.log('Targeted users: ' + targetedUsers.join(', '));
-                console.log('Non targeted users: ' + nonTargetedUsers.join(', '));
+                console.log('Non targeted users: ' + nonTargetedUsers.map(function(u) { return u.name; }).join(', '));
 
                 if (nonTargetedUsers.length > 0) {
                   const userIdx = Math.round(Math.random() * (nonTargetedUsers.length - 1));
-                  const targetUser = nonTargetedUsers[userIdx];
+                  var targetUser = nonTargetedUsers[userIdx];
 
                   if (targetUser !== null) {
                     targetUserId = targetUser._id;
                     targetUserName = targetUser.name;
                   }
                 } else if (nonTargetedUsers.length == 1) {
-                  const targetUser = nonTargetedUsers[0];
+                  var targetUser = nonTargetedUsers[0];
 
                   if (targetUser !== null) {
                     targetUserId = targetUser._id;
