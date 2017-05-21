@@ -70,5 +70,5 @@ Map.intersects = function(result) {
 Map.projectPoint = function(p, a, b) {
   var s = p.clone().sub(a);
   var e = b.clone().sub(a);
-  return a.clone().add(e.multiplyScalar(s.dot(e) * 1.0001 / e.dot(e)));
+  return a.clone().add(e.multiplyScalar(s.dot(e) / e.dot(e)));
 };
