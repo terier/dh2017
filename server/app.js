@@ -15,7 +15,7 @@ const canvasHeight = constants.canvasSize.height;
 
 const mongodbUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017/k1ller'
 
-const killMargin = 100;
+const killMargin = 150;
 
 var map = new Map.Map({
   vertices: [[-1000, -1000], [-1000, 1000], [1000, 1000], [1000, -1000]],
@@ -135,8 +135,8 @@ app.post('/login', function (req, res) {
       // generate user with random starting position
       var user = new models.User ({
         name: name,
-        x: Math.random() * canvasWidth - (canvasWidth / 2) - 200,
-        y: Math.random() * canvasHeight - (canvasHeight / 2) - 200,
+        x: Math.random() * canvasWidth - (canvasWidth / 2) - 500,
+        y: Math.random() * canvasHeight - (canvasHeight / 2) - 500,
         targetUserId: targetUserId,
         targetUserName: targetUserName
       });
