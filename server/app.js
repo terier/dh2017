@@ -313,6 +313,13 @@ app.post('/kill', function (req, res) {
                     targetUserId = targetUser._id;
                     targetUserName = targetUser.name;
                   }
+                } else if (nonTargetedUsers.length == 1) {
+                  const targetUser = nonTargetedUsers[0];
+
+                  if (targetUser !== null) {
+                    targetUserId = targetUser._id;
+                    targetUserName = targetUser.name;
+                  }
                 }
 
                 // update user that successfully killed
