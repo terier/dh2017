@@ -15,6 +15,8 @@ const canvasHeight = constants.canvasSize.height;
 
 const mongodbUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017/k1ller'
 
+const killMargin = 100;
+
 var map = new Map.Map({
   vertices: [[-1000, -1000], [-1000, 1000], [1000, 1000], [1000, -1000]],
   indices: [[0, 1], [1, 2], [2, 3], [3, 0]]
@@ -108,13 +110,13 @@ app.post('/login', function (req, res) {
       });
 
       users.forEach(function (user) {
-        if (targetedUsers.indexOf(user._id) === -1) {
+        if (targetedUsers.indexOf(user._id.toString()) == -1) {
           nonTargetedUsers.push(user);
         }
       });
 
       console.log('Targeted users: ' + targetedUsers.join(', '));
-      console.log('Non targeted users: ' + nonTargetedUsers.join(', '));
+      console.log('Non targeted users: ' + nonTargetedUsers.map(function(u) { return u.name; }).join(', '));
 
       if (nonTargetedUsers.length > 0) {
         const userIdx = Math.round(Math.random() * (nonTargetedUsers.length - 1));
@@ -133,8 +135,8 @@ app.post('/login', function (req, res) {
       // generate user with random starting position
       var user = new models.User ({
         name: name,
-        x: Math.random() * canvasWidth - (canvasWidth / 2),
-        y: Math.random() * canvasHeight - (canvasHeight / 2),
+        x: Math.random() * canvasWidth - (canvasWidth / 2) - 50,
+        y: Math.random() * canvasHeight - (canvasHeight / 2) - 50,
         targetUserId: targetUserId,
         targetUserName: targetUserName
       });
@@ -181,29 +183,187 @@ app.post('/update', function (req, res) {
         console.error('Error when fetching inserted user on update: ' + err);
       }
 
-      var newAx = user.x + (-3 * Number(ax));
-      var newAy = user.y + (3 * Number(ay));
+      if (user != null) {
+        var newAx = user.x + (-5 * Number(ax));
+        var newAy = user.y + (5 * Number(ay));
 
-      var from = new THREE.Vector2(user.x, user.y);
-      var to = new THREE.Vector2(newAx, newAy);
+        var from = new THREE.Vector2(user.x, user.y);
+        var to = new THREE.Vector2(newAx, newAy);
 
-      // calculate new position
-      var newPositionVector = map.move(from, to);
+        // calculate new position
+        var newPositionVector = map.move(from, to);
 
-      user.x = newPositionVector.x;
-      user.y = newPositionVector.y;
+        user.x = newPositionVector.x;
+        user.y = newPositionVector.y;
 
-      collection.save(user, {w: 1}, function (err) {
+        collection.save(user, {w: 1}, function (err) {
+          if (err) {
+            console.error('Error when saving user: ' + err);
+          }
+
+          console.log('User saved successfully!');
+
+          this.db.collection('user', function (err, collection) {
+            if (err) {
+              console.error('Error accessing user collection on update: ' + err);
+            }
+
+            collection.find().toArray(function (err, users) {
+              if (err) {
+                console.error('Error fetching users collection on update ' + err);
+              }
+
+              res.json({
+                users
+              });
+            });
+          });
+        });
+      } else {
+        collection.find().toArray(function (err, users) {
+          if (err) {
+            console.error('Error fetching users collection on update ' + err);
+          }
+
+          res.json({
+            users
+          });
+        });
+      }
+    })
+  });
+});
+
+// kill user & update position endpoint
+app.post('/kill', function (req, res) {
+  var userId = req.body._id;
+
+  console.log('Kill called for user ' + userId);
+
+  this.db.collection('user', function (err, collection) {
+    if (err) {
+      console.error('Error accessing user collection on kill: ' + err);
+    }
+
+    collection.findOne({ _id: new ObjectId(userId) }, function (err, user) {
+      if (err) {
+        console.error('Error when fetching trigger user on kill: ' + err);
+      }
+
+      var x = user.x;
+      var y = user.y;
+      var targetUserId = user.targetUserId;
+
+      collection.findOne({ _id: new ObjectId(targetUserId) }, function (err, targetUser) {
         if (err) {
-          console.error('Error when saving user: ' + err);
+          console.error('Error when fetching killed user on kill: ' + err);
         }
 
-        console.log('User saved successfully!');
+        if (targetUser != null) {
+          var targetX = targetUser.x;
+          var targetY = targetUser.y;
 
-        this.db.collection('user', function (err, collection) {
-          if (err) {
-            console.error('Error accessing user collection on update: ' + err);
+          var diffX = Math.abs(x - targetX);
+          var diffY = Math.abs(y - targetY);
+
+          console.log(diffX);
+          console.log(diffY);
+
+          if (diffX < killMargin && diffY < killMargin) {
+            console.log('Killed user with id: ' + targetUserId);
+
+            collection.remove({ _id: new ObjectId(targetUserId) }, function (err) {
+              if (err) {
+                console.error('Error removing user ' + err);
+              }
+
+              collection.find().toArray(function (err, users) {
+                if (err) {
+                  console.error('Error fetching users collection on update ' + err);
+                }
+
+                // update target
+                var targetUserId = null;
+                var targetUserName = null;
+
+                var targetedUsers = [];
+                var nonTargetedUsers = [];
+
+                users.forEach(function (user) {
+                  if (user.targetUserId !== null) {
+                    targetedUsers.push(user.targetUserId);
+                  }
+                });
+
+                users.forEach(function (user) {
+                  // exclude targeted users and yourself
+                  if (targetedUsers.indexOf(user._id) === -1 && user._id !== userId) {
+                    nonTargetedUsers.push(user);
+                  }
+                });
+
+                console.log('Targeted users: ' + targetedUsers.join(', '));
+                console.log('Non targeted users: ' + nonTargetedUsers.join(', '));
+
+                if (nonTargetedUsers.length > 0) {
+                  const userIdx = Math.round(Math.random() * (nonTargetedUsers.length - 1));
+                  const targetUser = nonTargetedUsers[userIdx];
+
+                  if (targetUser !== null) {
+                    targetUserId = targetUser._id;
+                    targetUserName = targetUser.name;
+                  }
+                } else if (nonTargetedUsers.length == 1) {
+                  const targetUser = nonTargetedUsers[0];
+
+                  if (targetUser !== null) {
+                    targetUserId = targetUser._id;
+                    targetUserName = targetUser.name;
+                  }
+                }
+
+                // update user that successfully killed
+                collection.findOne({ _id: new ObjectId(userId) }, function (err, user) {
+                  if (err) {
+                    console.error('Error when fetching trigger user on kill: ' + err);
+                  }
+
+                  console.log('Updating target of a user');
+
+                  user.targetUserId = targetUserId;
+                  user.targetUserName = targetUserName;
+
+                  collection.save(user, {w: 1}, function (err) {
+                    console.log('Targets of a user updated!');
+
+                    collection.find().toArray(function (err, users) {
+                      if (err) {
+                        console.error('Error fetching users collection on kill target update ' + err);
+                      }
+
+                      res.json({
+                        users
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          } else {
+            console.log('User not close enough to kill');
+
+            collection.find().toArray(function (err, users) {
+              if (err) {
+                console.error('Error fetching users collection on update ' + err);
+              }
+
+              res.json({
+                users
+              });
+            });
           }
+        } else {
+          console.log('Target user for this user is null!');
 
           collection.find().toArray(function (err, users) {
             if (err) {
@@ -214,7 +374,7 @@ app.post('/update', function (req, res) {
               users
             });
           });
-        });
+        }
       });
     })
   });
