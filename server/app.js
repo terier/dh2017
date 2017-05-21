@@ -11,8 +11,10 @@ var constants = require('./constants');
 const canvasWidth = constants.canvasSize.width;
 const canvasHeight = constants.canvasSize.height;
 
+const mongodbUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017/k1ller'
+
 // Connect to the db
-MongoClient.connect('mongodb://localhost:27017/k1ller', function (err, db) {
+MongoClient.connect(mongodbUrl, function (err, db) {
   if (err) {
     throw err;
   }
