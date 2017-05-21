@@ -240,121 +240,144 @@ app.post('/kill', function (req, res) {
 
   console.log('Kill called for user ' + userId);
 
-  this.db.collection('user', function (err, collection) {
-    if (err) {
-      console.error('Error accessing user collection on kill: ' + err);
-    }
-
-    collection.findOne({ _id: new ObjectId(userId) }, function (err, user) {
+  try {
+    this.db.collection('user', function (err, collection) {
       if (err) {
-        console.error('Error when fetching trigger user on kill: ' + err);
+        console.error('Error accessing user collection on kill: ' + err);
+        throw err;
       }
 
-      var x = user.x;
-      var y = user.y;
-      var targetUserId = user.targetUserId;
-
-      collection.findOne({ _id: new ObjectId(targetUserId) }, function (err, targetUser) {
+      collection.findOne({ _id: new ObjectId(userId) }, function (err, user) {
         if (err) {
-          console.error('Error when fetching killed user on kill: ' + err);
+          console.error('Error when fetching trigger user on kill: ' + err);
+          throw err;
         }
 
-        if (targetUser != null) {
-          var targetX = targetUser.x;
-          var targetY = targetUser.y;
+        var x = user.x;
+        var y = user.y;
+        var targetUserId = user.targetUserId;
 
-          var diffX = Math.abs(x - targetX);
-          var diffY = Math.abs(y - targetY);
+        collection.findOne({ _id: new ObjectId(targetUserId) }, function (err, targetUser) {
+          if (err) {
+            console.error('Error when fetching killed user on kill: ' + err);
+            throw err;
+          }
 
-          console.log(diffX);
-          console.log(diffY);
+          if (targetUser != null) {
+            var targetX = targetUser.x;
+            var targetY = targetUser.y;
 
-          if (diffX < killMargin && diffY < killMargin) {
-            console.log('Killed user with id: ' + targetUserId);
+            var diffX = Math.abs(x - targetX);
+            var diffY = Math.abs(y - targetY);
 
-            collection.remove({ _id: new ObjectId(targetUserId) }, function (err) {
-              if (err) {
-                console.error('Error removing user ' + err);
-              }
+            console.log(diffX);
+            console.log(diffY);
 
-              collection.find().toArray(function (err, users) {
+            if (diffX < killMargin && diffY < killMargin) {
+              console.log('Killed user with id: ' + targetUserId);
+
+              collection.remove({ _id: new ObjectId(targetUserId) }, function (err) {
                 if (err) {
-                  console.error('Error fetching users collection on update ' + err);
+                  console.error('Error removing user ' + err);
+                  throw err;
                 }
 
-                // update target
-                var targetUserId = null;
-                var targetUserName = null;
-
-                var targetedUsers = [];
-                var nonTargetedUsers = [];
-
-                users.forEach(function (user) {
-                  if (user.targetUserId !== null) {
-                    targetedUsers.push(user.targetUserId);
-                  }
-                });
-
-                users.forEach(function (user) {
-                  // exclude targeted users and yourself
-                  if (targetedUsers.indexOf(user._id) === -1 && user._id.toString() !== userId) {
-                    nonTargetedUsers.push(user);
-                  }
-                });
-
-                console.log('Targeted users: ' + targetedUsers.join(', '));
-                console.log('Non targeted users: ' + nonTargetedUsers.map(function(u) { return u.name; }).join(', '));
-
-                if (nonTargetedUsers.length > 0) {
-                  const userIdx = Math.round(Math.random() * (nonTargetedUsers.length - 1));
-                  var targetUser = nonTargetedUsers[userIdx];
-
-                  if (targetUser !== null) {
-                    targetUserId = targetUser._id;
-                    targetUserName = targetUser.name;
-                  }
-                } else if (nonTargetedUsers.length == 1) {
-                  var targetUser = nonTargetedUsers[0];
-
-                  if (targetUser !== null) {
-                    targetUserId = targetUser._id;
-                    targetUserName = targetUser.name;
-                  }
-                }
-
-                // update user that successfully killed
-                collection.findOne({ _id: new ObjectId(userId) }, function (err, user) {
+                collection.find().toArray(function (err, users) {
                   if (err) {
-                    console.error('Error when fetching trigger user on kill: ' + err);
+                    console.error('Error fetching users collection on update ' + err);
+                    throw err;
                   }
 
-                  console.log('Updating target of a user');
+                  // update target
+                  var targetUserId = null;
+                  var targetUserName = null;
 
-                  user.targetUserId = targetUserId;
-                  user.targetUserName = targetUserName;
+                  var targetedUsers = [];
+                  var nonTargetedUsers = [];
 
-                  collection.save(user, {w: 1}, function (err) {
-                    console.log('Targets of a user updated!');
+                  users.forEach(function (user) {
+                    if (user.targetUserId !== null) {
+                      targetedUsers.push(user.targetUserId);
+                    }
+                  });
 
-                    collection.find().toArray(function (err, users) {
-                      if (err) {
-                        console.error('Error fetching users collection on kill target update ' + err);
-                      }
+                  users.forEach(function (user) {
+                    // exclude targeted users and yourself
+                    if (targetedUsers.indexOf(user._id) === -1 && user._id.toString() !== userId) {
+                      nonTargetedUsers.push(user);
+                    }
+                  });
 
-                      res.json({
-                        users
+                  console.log('Targeted users: ' + targetedUsers.join(', '));
+                  console.log('Non targeted users: ' + nonTargetedUsers.map(function(u) { return u.name; }).join(', '));
+
+                  if (nonTargetedUsers.length > 0) {
+                    const userIdx = Math.round(Math.random() * (nonTargetedUsers.length - 1));
+                    var targetUser = nonTargetedUsers[userIdx];
+
+                    if (targetUser !== null) {
+                      targetUserId = targetUser._id;
+                      targetUserName = targetUser.name;
+                    }
+                  } else if (nonTargetedUsers.length == 1) {
+                    var targetUser = nonTargetedUsers[0];
+
+                    if (targetUser !== null) {
+                      targetUserId = targetUser._id;
+                      targetUserName = targetUser.name;
+                    }
+                  }
+
+                  // update user that successfully killed
+                  collection.findOne({ _id: new ObjectId(userId) }, function (err, user) {
+                    if (err) {
+                      console.error('Error when fetching trigger user on kill: ' + err);
+                      throw err;
+                    }
+
+                    console.log('Updating target of a user');
+
+                    user.targetUserId = targetUserId;
+                    user.targetUserName = targetUserName;
+
+                    collection.save(user, {w: 1}, function (err) {
+                      console.log('Targets of a user updated!');
+
+                      collection.find().toArray(function (err, users) {
+                        if (err) {
+                          console.error('Error fetching users collection on kill target update ' + err);
+                          throw err;
+                        }
+
+                        res.json({
+                          users
+                        });
                       });
                     });
                   });
                 });
               });
-            });
+            } else {
+              console.log('User not close enough to kill');
+
+              collection.find().toArray(function (err, users) {
+                if (err) {
+                  console.error('Error fetching users collection on update ' + err);
+                  throw err;
+                }
+
+                res.json({
+                  users
+                });
+              });
+            }
           } else {
-            console.log('User not close enough to kill');
+            console.log('Target user for this user is null!');
 
             collection.find().toArray(function (err, users) {
               if (err) {
                 console.error('Error fetching users collection on update ' + err);
+                throw err;
               }
 
               res.json({
@@ -362,22 +385,14 @@ app.post('/kill', function (req, res) {
               });
             });
           }
-        } else {
-          console.log('Target user for this user is null!');
-
-          collection.find().toArray(function (err, users) {
-            if (err) {
-              console.error('Error fetching users collection on update ' + err);
-            }
-
-            res.json({
-              users
-            });
-          });
-        }
-      });
-    })
-  });
+        });
+      })
+    });
+  } catch (err) {
+    res.json({
+      message: 'error happened ' + err
+    });
+  }
 });
 
 app.listen(app.get('port'), function () {
