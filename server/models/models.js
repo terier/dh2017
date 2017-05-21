@@ -38,7 +38,7 @@ var initUsers = function(db) {
       }
 
       var user = new User ({
-        name: 'User 1',
+        name: 'Ziga',
         x: Math.random() * canvasWidth - (canvasWidth / 2),
         y: Math.random() * canvasHeight - (canvasHeight / 2),
         targetUserId: null,
