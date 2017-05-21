@@ -282,8 +282,63 @@ app.post('/kill', function (req, res) {
                   console.error('Error fetching users collection on update ' + err);
                 }
 
-                res.json({
-                  users
+                // update target
+                var targetUserId = null;
+                var targetUserName = null;
+
+                var targetedUsers = [];
+                var nonTargetedUsers = [];
+
+                users.forEach(function (user) {
+                  if (user.targetUserId !== null) {
+                    targetedUsers.push(user.targetUserId);
+                  }
+                });
+
+                users.forEach(function (user) {
+                  // exclude targeted users and yourself
+                  if (targetedUsers.indexOf(user._id) === -1 && user._id !== userId) {
+                    nonTargetedUsers.push(user);
+                  }
+                });
+
+                console.log('Targeted users: ' + targetedUsers.join(', '));
+                console.log('Non targeted users: ' + nonTargetedUsers.join(', '));
+
+                if (nonTargetedUsers.length > 0) {
+                  const userIdx = Math.round(Math.random() * (nonTargetedUsers.length - 1));
+                  const targetUser = nonTargetedUsers[userIdx];
+
+                  if (targetUser !== null) {
+                    targetUserId = targetUser._id;
+                    targetUserName = targetUser.name;
+                  }
+                }
+
+                // update user that successfully killed
+                collection.findOne({ _id: new ObjectId(userId) }, function (err, user) {
+                  if (err) {
+                    console.error('Error when fetching trigger user on kill: ' + err);
+                  }
+
+                  console.log('Updating target of a user');
+
+                  user.targetUserId = targetUserId;
+                  user.targetUserName = targetUserName;
+
+                  collection.save(user, {w: 1}, function (err) {
+                    console.log('Targets of a user updated!');
+
+                    collection.find().toArray(function (err, users) {
+                      if (err) {
+                        console.error('Error fetching users collection on kill target update ' + err);
+                      }
+
+                      res.json({
+                        users
+                      });
+                    });
+                  });
                 });
               });
             });
