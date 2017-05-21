@@ -37,7 +37,21 @@ app.get('/', function (req, res) {
 
 app.get('/data', function (req, res) {
   res.setHeader('Content-Type', 'application/json');
-  res.send('{ "test": "17" }');
+  this.db.collection('user', function (err, collection) {
+    if (err) {
+      console.error('Error accessing user collection: ' + err);
+    }
+
+    collection.find().toArray(function (err, users) {
+      if (err) {
+        console.error('Error fetching users collection ' + err);
+      }
+
+      res.json({
+        users
+      })
+    });
+  });
 });
 
 app.use(bodyParser.json());
