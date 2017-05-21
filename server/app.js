@@ -149,6 +149,21 @@ app.post('/update', function (req, res) {
   var az = req.body.az;
 
   console.log('Update called for user ' + userId + ', data: ');
+
+  this.db.collection('user', function (err, collection) {
+    if (err) {
+      console.error('Error accessing user collection: ' + err);
+    }
+
+    collection.find().toArray(function (err, users) {
+      if (err) {
+        console.error('Error fetching users collection ' + err);
+      }
+
+      res.json({
+        users
+      })
+    });
 });
 
 app.listen(app.get('port'), function () {
