@@ -1,3 +1,5 @@
+var THREE = require('three-math');
+
 function Map(data) {
   this.walls = [];
   for (var i = 0; i < data.indices.length; i++) {

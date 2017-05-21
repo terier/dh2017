@@ -16,8 +16,8 @@ const canvasHeight = constants.canvasSize.height;
 const mongodbUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017/k1ller'
 
 var map = new Map.Map({
-  vertices: [],
-  indices: []
+  vertices: [[-1000, -1000], [-1000, 1000], [1000, 1000], [1000, -1000]],
+  indices: [[0, 1], [1, 2], [2, 3], [3, 0]]
 });
 
 // Connect to the db
