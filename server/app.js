@@ -135,8 +135,8 @@ app.post('/login', function (req, res) {
       // generate user with random starting position
       var user = new models.User ({
         name: name,
-        x: Math.random() * canvasWidth - (canvasWidth / 2) - 50,
-        y: Math.random() * canvasHeight - (canvasHeight / 2) - 50,
+        x: Math.random() * canvasWidth - (canvasWidth / 2) - 100,
+        y: Math.random() * canvasHeight - (canvasHeight / 2) - 100,
         targetUserId: targetUserId,
         targetUserName: targetUserName
       });
@@ -307,14 +307,14 @@ app.post('/kill', function (req, res) {
 
                 if (nonTargetedUsers.length > 0) {
                   const userIdx = Math.round(Math.random() * (nonTargetedUsers.length - 1));
-                  const targetUser = nonTargetedUsers[userIdx];
+                  var targetUser = nonTargetedUsers[userIdx];
 
                   if (targetUser !== null) {
                     targetUserId = targetUser._id;
                     targetUserName = targetUser.name;
                   }
                 } else if (nonTargetedUsers.length == 1) {
-                  const targetUser = nonTargetedUsers[0];
+                  var targetUser = nonTargetedUsers[0];
 
                   if (targetUser !== null) {
                     targetUserId = targetUser._id;
