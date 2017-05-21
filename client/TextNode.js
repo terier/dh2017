@@ -55,7 +55,7 @@ TextNode.makeTextSprite = function( message, parameters ) {
     depthWrite: false
   });
   var sprite = new THREE.Sprite( spriteMaterial );
-  sprite.scale.set(100,50,1.0);
+  sprite.scale.set(1000,500,1.0);
   return sprite;  
 }
 
