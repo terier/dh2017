@@ -24,34 +24,7 @@ MongoClient.connect(mongodbUrl, function (err, db) {
   // set db variable
   this.db = db;
 
-  // clear users and one user when instantiating the server
-  db.collection('user', function (err, collection) {
-    if (err) {
-      console.error('Error accessing user collection: ' + err);
-    }
-
-    collection.remove(function (err) {
-      if (err) {
-        console.error('Error removing users from user collection: ' + err);
-      }
-
-      var user = new models.User ({
-        name: 'User 1',
-        x: Math.random() * canvasWidth - (canvasWidth / 2),
-        y: Math.random() * canvasHeight - (canvasHeight / 2),
-        targetUserId: null,
-        targetUserName: null
-      });
-
-      collection.save(user, {w: 1}, function (err) {
-        if (err) {
-          console.error('Error when saving user: ' + err);
-        }
-
-        console.log('Initial user saved successfully!');
-      });
-    })
-  });
+  models.initUsers(db);
 });
 
 getDatabase = function() {
@@ -74,6 +47,16 @@ app.use(bodyParser.json());
 app.use('/display', express.static(path.join(__dirname, '../client')));
 app.use('/shared', express.static(path.join(__dirname, '../shared')));
 
+// initialize users
+app.get('/reset', function (req, res) {
+  models.initUsers(db);
+
+  res.json({
+    message: 'success'
+  });
+});
+
+// login user endpoint
 app.post('/login', function (req, res) {
   var name = req.body.name;
 
@@ -156,6 +139,16 @@ app.post('/login', function (req, res) {
       });
     });
   });
+});
+
+// update user position endpoint
+app.post('/update', function (req, res) {
+  var userId = req.body._id;
+  var ax = req.body.ax;
+  var ay = req.body.ay;
+  var az = req.body.az;
+
+  console.log('Update called for user ' + userId + ', data: ');
 });
 
 app.listen(app.get('port'), function () {

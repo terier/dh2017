@@ -1,5 +1,8 @@
 var mongoose = require('mongoose');
-var constants = require('../constants')
+var constants = require('../constants');
+
+const canvasWidth = constants.canvasSize.width;
+const canvasHeight = constants.canvasSize.height;
 
 var Schema = new mongoose.Schema({
   name: {
@@ -21,6 +24,37 @@ var Schema = new mongoose.Schema({
 });
 
 var User = mongoose.model('User', Schema);
+
+var initUsers = function(db) {
+  // clear users and one user when instantiating the server
+  db.collection('user', function (err, collection) {
+    if (err) {
+      console.error('Error accessing user collection: ' + err);
+    }
+
+    collection.remove(function (err) {
+      if (err) {
+        console.error('Error removing users from user collection: ' + err);
+      }
+
+      var user = new User ({
+        name: 'User 1',
+        x: Math.random() * canvasWidth - (canvasWidth / 2),
+        y: Math.random() * canvasHeight - (canvasHeight / 2),
+        targetUserId: null,
+        targetUserName: null
+      });
+
+      collection.save(user, {w: 1}, function (err) {
+        if (err) {
+          console.error('Error when saving user: ' + err);
+        }
+
+        console.log('Initial user saved successfully!');
+      });
+    })
+  });
+}
 
 var createUser = function (db, name) {
   const canvasWidth = constants.canvasSize.width;
@@ -125,6 +159,7 @@ var getUserByName = function (db, name) {
 
 module.exports = {
   User: User,
+  initUsers: initUsers,
   createUser: createUser,
   saveUser: saveUser,
   getUserByName: getUserByName
