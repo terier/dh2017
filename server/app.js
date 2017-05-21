@@ -164,6 +164,7 @@ app.post('/update', function (req, res) {
         users
       })
     });
+  });
 });
 
 app.listen(app.get('port'), function () {
