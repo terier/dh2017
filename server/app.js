@@ -182,7 +182,7 @@ app.post('/update', function (req, res) {
       }
 
       var newAx = user.x + Number(ax);
-      var newAy = user.y + Number(ay);
+      var newAy = user.y + (-Number(ay));
 
       var from = new THREE.Vector2(user.x, user.y);
       var to = new THREE.Vector2(newAx, newAy);
