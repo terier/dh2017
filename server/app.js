@@ -61,6 +61,8 @@ app.use('/shared', express.static(path.join(__dirname, '../shared')));
 
 // initialize users
 app.get('/reset', function (req, res) {
+  console.log('Resetting database, clearing all users...');
+
   models.initUsers(db);
 
   res.json({
@@ -160,7 +162,7 @@ app.post('/update', function (req, res) {
   var ay = req.body.ay;
   var az = req.body.az;
 
-  console.log('Update called for user ' + userId + ', data: ax: ' + ax + ' ay: ' + ay + 'az: ' + az);
+  console.log('Update called for user ' + userId + ', data: ax: ' + ax + ' ay: ' + ay + ' az: ' + az);
 
   this.db.collection('user', function (err, collection) {
     if (err) {
