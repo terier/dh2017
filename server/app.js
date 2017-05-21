@@ -184,8 +184,8 @@ app.post('/update', function (req, res) {
       }
 
       if (user != null) {
-        var newAx = user.x + (-10 * Number(ax));
-        var newAy = user.y + (10 * Number(ay));
+        var newAx = user.x + (-7 * Number(ax));
+        var newAy = user.y + (7 * Number(ay));
 
         var from = new THREE.Vector2(user.x, user.y);
         var to = new THREE.Vector2(newAx, newAy);
