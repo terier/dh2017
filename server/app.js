@@ -110,13 +110,13 @@ app.post('/login', function (req, res) {
       });
 
       users.forEach(function (user) {
-        if (targetedUsers.indexOf(user._id) === -1) {
+        if (targetedUsers.indexOf(user._id.toString()) == -1) {
           nonTargetedUsers.push(user);
         }
       });
 
       console.log('Targeted users: ' + targetedUsers.join(', '));
-      console.log('Non targeted users: ' + nonTargetedUsers.join(', '));
+      console.log('Non targeted users: ' + nonTargetedUsers.map(function(u) { return u.name; }).join(', '));
 
       if (nonTargetedUsers.length > 0) {
         const userIdx = Math.round(Math.random() * (nonTargetedUsers.length - 1));
