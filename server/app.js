@@ -191,7 +191,8 @@ app.post('/update', function (req, res) {
         var to = new THREE.Vector2(newAx, newAy);
 
         // calculate new position
-        var newPositionVector = map.move(from, to);
+        // var newPositionVector = map.move(from, to);
+        var newPositionVector = from.clone().lerp(map.move(from, to), 0.9);
 
         user.x = newPositionVector.x;
         user.y = newPositionVector.y;
