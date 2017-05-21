@@ -30,11 +30,11 @@ function createUserVisual() {
 }
 
 function update() {
-  Object.keys(users).forEach(function(user) {
-    user._updated = false;
-  });
   $.ajax('/data')
     .done(function(data) {
+      Object.keys(users).forEach(function(id) {
+        users[id]._updated = false;
+      });
       var u = data.users;
       u.forEach(function(user) {
         if (user._id in users) {
@@ -47,13 +47,14 @@ function update() {
           users[user._id]._visual = createUserVisual();
         }
       });
+
+      Object.keys(users).forEach(function(id) {
+        if (!users[id]._updated) {
+          renderer.scene.remove(users[id]._visual);
+          delete users[id];
+        }
+      });
     });
-  Object.keys(users).forEach(function(id) {
-    if (!users[id]._updated) {
-      renderer.scene.remove(users[id]._visual);
-      delete users[id];
-    }
-  });
 }
 
 var updateInterval = 1000;
