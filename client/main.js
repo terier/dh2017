@@ -9,13 +9,14 @@ function render() {
   Object.keys(users).forEach(function(id) {
     var user = users[id];
     var oldx = user._visual.position.x;
-    var oldy = user._visual.position.y;
+    var oldy = user._visual.position.z;
     var newx = user.x;
     var newy = user.y;
     var smooth = 0.97;
     var x = newx - (newx - oldx) * smooth;
     var y = newy - (newy - oldy) * smooth;
-    user._visual.position.set(x, userSize / 2, y);
+    var z = renderer.terrain.getHeight(x, y);
+    user._visual.position.set(x, z + userSize / 2, y);
     renderer.scene.add(user._visual);
   });
   renderer.render();
@@ -24,12 +25,12 @@ function render() {
 
 requestAnimationFrame(render);
 
-var userGeometry = new THREE.BoxGeometry(userSize, userSize, userSize);
+var userGeometry = new THREE.SphereGeometry(userSize, 32, 64);
 
 function createUserVisual() {
   var color = new THREE.Color(0xffffff);
   color.setHex(Math.random() * 0xffffff);
-  var material = new THREE.MeshBasicMaterial({
+  var material = new THREE.MeshLambertMaterial({
     color: color
   });
   var mesh = new THREE.Mesh(userGeometry, material);
