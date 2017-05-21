@@ -5,6 +5,8 @@ var models = require('./models/models');
 var bodyParser = require('body-parser');
 var THREE = require('three-math');
 var MongoClient = require('mongodb').MongoClient;
+var Map = require('./Map.js');
+var ObjectId = require('mongodb').ObjectID;
 
 var constants = require('./constants');
 
@@ -12,6 +14,11 @@ const canvasWidth = constants.canvasSize.width;
 const canvasHeight = constants.canvasSize.height;
 
 const mongodbUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017/k1ller'
+
+var map = new Map.Map({
+  vertices: [],
+  indices: []
+});
 
 // Connect to the db
 MongoClient.connect(mongodbUrl, function (err, db) {
@@ -49,7 +56,7 @@ app.get('/data', function (req, res) {
 
       res.json({
         users
-      })
+      });
     });
   });
 });
@@ -166,18 +173,50 @@ app.post('/update', function (req, res) {
 
   this.db.collection('user', function (err, collection) {
     if (err) {
-      console.error('Error accessing user collection: ' + err);
+      console.error('Error accessing user collection on update: ' + err);
     }
 
-    collection.find().toArray(function (err, users) {
+    collection.findOne({ _id: new ObjectId(userId) }, function (err, user) {
       if (err) {
-        console.error('Error fetching users collection ' + err);
+        console.error('Error when fetching inserted user on update: ' + err);
       }
 
-      res.json({
-        users
-      })
-    });
+      var newAx = user.x + ax;
+      var newAy = user.y + ay;
+
+      var from = new THREE.Vector2(user.x, user.y);
+      var to = new THREE.Vector2(newAx, newAy);
+
+      // calculate new position
+      var newPositionVector = map.move(from, to);
+
+      user.x = newPositionVector.x;
+      user.y = newPositionVector.y;
+
+      collection.save(user, {w: 1}, function (err) {
+        if (err) {
+          console.error('Error when saving user: ' + err);
+        }
+
+        console.log('User saved successfully!');
+
+        this.db.collection('user', function (err, collection) {
+          if (err) {
+            console.error('Error accessing user collection on update: ' + err);
+          }
+
+          collection.find().toArray(function (err, users) {
+            if (err) {
+              console.error('Error fetching users collection on update ' + err);
+            }
+
+            res.json({
+              users
+            });
+          });
+        });
+      });
+    })
   });
 });
 
