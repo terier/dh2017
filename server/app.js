@@ -135,8 +135,8 @@ app.post('/login', function (req, res) {
       // generate user with random starting position
       var user = new models.User ({
         name: name,
-        x: Math.random() * canvasWidth - (canvasWidth / 2),
-        y: Math.random() * canvasHeight - (canvasHeight / 2),
+        x: Math.random() * canvasWidth - (canvasWidth / 2) - 50,
+        y: Math.random() * canvasHeight - (canvasHeight / 2) - 50,
         targetUserId: targetUserId,
         targetUserName: targetUserName
       });
