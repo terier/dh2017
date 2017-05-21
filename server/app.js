@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var path = require('path');
 var models = require('./models/models');
+var THREE = require('three-math');
 
 const constants = require('constants')
 
@@ -16,7 +17,8 @@ app.get('/data', function(req, res) {
   res.send('{ "test": "17" }');
 });
 
-app.use('/display', express.static(path.join(__dirname, '../client')))
+app.use('/display', express.static(path.join(__dirname, '../client')));
+app.use('/shared', express.static(path.join(__dirname, '../shared')));
 
 app.post('/login', function (req, res) {
   const name = req.params.name;
