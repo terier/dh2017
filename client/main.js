@@ -27,13 +27,14 @@ requestAnimationFrame(render);
 
 var userGeometry = new THREE.SphereGeometry(userSize, 32, 64);
 
-function createUserVisual() {
+function createUserVisual(text) {
   var color = new THREE.Color(0xffffff);
   color.setHex(Math.random() * 0xffffff);
   var material = new THREE.MeshLambertMaterial({
     color: color
   });
   var mesh = new THREE.Mesh(userGeometry, material);
+  var textnode = new TextNode(text, mesh);
   return mesh;
 }
 
@@ -52,7 +53,7 @@ function update() {
         } else {
           users[user._id] = user;
           users[user._id]._updated = true;
-          users[user._id]._visual = createUserVisual();
+          users[user._id]._visual = createUserVisual(user.name);
         }
       });
 
