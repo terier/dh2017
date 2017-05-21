@@ -3,12 +3,19 @@
 var renderer = new Renderer();
 var userSize = 10;
 
-var users = {};
+var users = window.users = {};
 
 function render() {
   Object.keys(users).forEach(function(id) {
     var user = users[id];
-    user._visual.position.set(user.x, userSize / 2, user.y);
+    var oldx = user._visual.position.x;
+    var oldy = user._visual.position.y;
+    var newx = user.x;
+    var newy = user.y;
+    var smooth = 0.97;
+    var x = newx - (newx - oldx) * smooth;
+    var y = newy - (newy - oldy) * smooth;
+    user._visual.position.set(x, userSize / 2, y);
     renderer.scene.add(user._visual);
   });
   renderer.render();
