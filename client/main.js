@@ -8,7 +8,12 @@ var users = {};
 function render() {
   Object.keys(users).forEach(function(id) {
     var user = users[id];
-    user._visual.position.set(user.x, userSize / 2, user.y);
+    var dx = user.x - user._visual.position.x;
+    var dy = user.y - user._visual.position.y;
+    var smoothFactor = 0.9;
+    var finalx = user._visual.position.x + dx * smoothFactor;
+    var finaly = user._visual.position.y + dy * smoothFactor;
+    user._visual.position.set(finalx, userSize / 2, finaly);
     renderer.scene.add(user._visual);
   });
   renderer.render();

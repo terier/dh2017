@@ -15,6 +15,8 @@ const canvasHeight = constants.canvasSize.height;
 
 const mongodbUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017/k1ller'
 
+const killMargin = 100;
+
 var map = new Map.Map({
   vertices: [[-1000, -1000], [-1000, 1000], [1000, 1000], [1000, -1000]],
   indices: [[0, 1], [1, 2], [2, 3], [3, 0]]
@@ -181,8 +183,8 @@ app.post('/update', function (req, res) {
         console.error('Error when fetching inserted user on update: ' + err);
       }
 
-      var newAx = user.x + (-3 * Number(ax));
-      var newAy = user.y + (3 * Number(ay));
+      var newAx = user.x + (-5 * Number(ax));
+      var newAy = user.y + (5 * Number(ay));
 
       var from = new THREE.Vector2(user.x, user.y);
       var to = new THREE.Vector2(newAx, newAy);
@@ -215,6 +217,90 @@ app.post('/update', function (req, res) {
             });
           });
         });
+      });
+    })
+  });
+});
+
+// kill user & update position endpoint
+app.post('/kill', function (req, res) {
+  var userId = req.body._id;
+
+  console.log('Kill called for user ' + userId);
+
+  this.db.collection('user', function (err, collection) {
+    if (err) {
+      console.error('Error accessing user collection on kill: ' + err);
+    }
+
+    collection.findOne({ _id: new ObjectId(userId) }, function (err, user) {
+      if (err) {
+        console.error('Error when fetching trigger user on kill: ' + err);
+      }
+
+      var x = user.x;
+      var y = user.y;
+      var targetUserId = user.targetUserId;
+
+      collection.findOne({ _id: new ObjectId(targetUserId) }, function (err, targetUser) {
+        if (err) {
+          console.error('Error when fetching killed user on kill: ' + err);
+        }
+
+        if (targetUser != null) {
+          var targetX = targetUser.x;
+          var targetY = targetUser.y;
+
+          var diffX = Math.abs(x - targetX);
+          var diffY = Math.abs(y - targetY);
+
+          console.log(diffX);
+          console.log(diffY);
+
+          if (diffX < killMargin && diffY < killMargin) {
+            console.log('Killed user with id: ' + targetUserId);
+
+            collection.remove({ _id: new ObjectId(targetUserId) }, function (err) {
+              if (err) {
+                console.error('Error removing user ' + err);
+              }
+
+              collection.find().toArray(function (err, users) {
+                if (err) {
+                  console.error('Error fetching users collection on update ' + err);
+                }
+
+                res.json({
+                  users
+                });
+              });
+            });
+          } else {
+            console.log('User not close enough to kill');
+
+            collection.find().toArray(function (err, users) {
+              if (err) {
+                console.error('Error fetching users collection on update ' + err);
+              }
+
+              res.json({
+                users
+              });
+            });
+          }
+        } else {
+          console.log('Target user for this user is null!');
+
+          collection.find().toArray(function (err, users) {
+            if (err) {
+              console.error('Error fetching users collection on update ' + err);
+            }
+
+            res.json({
+              users
+            });
+          });
+        }
       });
     })
   });
