@@ -23,8 +23,6 @@ MongoClient.connect(mongodbUrl, function (err, db) {
 
   // set db variable
   this.db = db;
-
-  models.initUsers(db);
 });
 
 getDatabase = function() {
