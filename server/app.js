@@ -181,8 +181,8 @@ app.post('/update', function (req, res) {
         console.error('Error when fetching inserted user on update: ' + err);
       }
 
-      var newAx = user.x + (3 * Number(ax));
-      var newAy = user.y + (-3 * Number(ay));
+      var newAx = user.x + (-3 * Number(ax));
+      var newAy = user.y + (3 * Number(ay));
 
       var from = new THREE.Vector2(user.x, user.y);
       var to = new THREE.Vector2(newAx, newAy);
