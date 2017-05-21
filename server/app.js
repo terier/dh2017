@@ -3,10 +3,10 @@ var app = express();
 var path = require('path');
 var models = require('./models/models');
 var bodyParser = require('body-parser');
+var THREE = require('three-math');
+var MongoClient = require('mongodb').MongoClient;
 
 var constants = require('./constants');
-
-var MongoClient = require('mongodb').MongoClient;
 
 const canvasWidth = constants.canvasSize.width;
 const canvasHeight = constants.canvasSize.height;
@@ -70,6 +70,7 @@ app.get('/data', function (req, res) {
 app.use(bodyParser.json());
 
 app.use('/display', express.static(path.join(__dirname, '../client')));
+app.use('/shared', express.static(path.join(__dirname, '../shared')));
 
 app.post('/login', function (req, res) {
   var name = req.body.name;
